@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 class KalmanFilter(object):
     def __init__(self, F=None, B=None, H=None, Q=None, R=None, P=None, x0=None):
@@ -13,7 +14,7 @@ class KalmanFilter(object):
         self.H = H
         self.B = 0 if B is None else B
         self.Q = np.eye(self.n) if Q is None else Q
-        self.R = np.eye(self.n) if R is None else R
+        self.R = np.eye(self.m) if R is None else R
         self.P = np.eye(self.n) if P is None else P
         self.x = np.zeros((self.n, 1)) if x0 is None else x0
 
@@ -38,7 +39,7 @@ def example():
     Q = np.eye(5) * 0.05
     R = np.eye(2) * 0.5
 
-    time = np.linspace(0, 20, 100)
+    time = np.linspace(0, 10, 100)
     x_positions = np.sin(time) * 10  # Simulating left to right movement
     y_positions = np.cos(time) * 5   # Simulating slight vertical movement
     measurements = np.vstack((x_positions, y_positions)) + np.random.normal(0, 0.5, (2, 100))
@@ -57,18 +58,28 @@ def example():
     
     axs[0].plot(measurements[0], measurements[1], 'bo', markersize=3, alpha=0.5, label='Measurements')
     axs[0].plot(predictions[:, 0], predictions[:, 1], 'r-', label='Kalman Filter Prediction')
+    axs[0].scatter(predictions[0, 0], predictions[0, 1], color='green', s=100, label='Start')
+    axs[0].scatter(predictions[-1, 0], predictions[-1, 1], color='red', s=100, label='End')
     axs[0].set_xlabel("X Position")
     axs[0].set_ylabel("Y Position")
     axs[0].legend()
     axs[0].set_title("Player Movement on Field")
     
     axs[1].plot(time, predictions[:, 0], 'g-', label='X Position Over Time')
+    axs[1].scatter(time[0], predictions[0, 0], color='green', s=100, label='Start')
+    axs[1].scatter(time[-1], predictions[-1, 0], color='red', s=100, label='End')
     axs[1].set_xlabel("Time")
     axs[1].set_ylabel("X Position")
     axs[1].legend()
     axs[1].set_title("X Position Over Time (Parabolic Movement)")
     
     plt.tight_layout()
+    
+    output_folder = "output_images"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    
+    plt.savefig(os.path.join(output_folder, "kalman_filter_graph.png"))
     plt.show()
 
 if __name__ == '__main__':
